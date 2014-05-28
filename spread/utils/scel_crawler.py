@@ -1,5 +1,6 @@
 #-*- coding: utf-8 -*-
 import re
+import os
 import Queue
 import threading
 import urllib
@@ -35,7 +36,7 @@ class SingePage(object):
         if page is None:
             page = 1
         download_links = []
-        while(True):
+        while True:
             links = self.fetch_page(page)
             if not links:
                 break
@@ -91,6 +92,10 @@ class Downloader(threading.Thread):
         self.queue = queue
 
     def run(self):
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.62 Safari/537.36',
+            'Referer': 'http://pinyin.sogou.com/dict/list.php',
+        }
         while True:
             if self.queue.empty():
                 break
@@ -98,5 +103,17 @@ class Downloader(threading.Thread):
             task = self.queue.get()
             _id, name, url, path = task
             target = '%s/%s.scel' % (path, name)
-            urllib.urlretrieve(url, target)
-            self.queue.task_done()
+
+            if os.path.exists(target):
+                print "Passing %s" % target
+                self.queue.task_done()
+                continue
+            try:
+                content = requests.get(url, headers=headers)
+                scel_file = open(target, 'wb')
+                scel_file.write(content.content)
+                scel_file.close()
+            except Exception:
+                continue
+            finally:
+                self.queue.task_done()

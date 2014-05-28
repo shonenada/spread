@@ -24,7 +24,7 @@ class CrawlerCommand(object):
         self.args = args
 
     def valid(self):
-        if not len(self.args) == len(args_table):
+        if not len(self.args) == len(self.args_table):
             return False
         return True
 
@@ -37,7 +37,11 @@ class CrawlerCommand(object):
         # parse args
         save_to, lower, upper, limit = self.args
 
+        lower = int(lower)
+        upper = int(upper)
+        limit = int(limit)
+
         rp = RangePage(save_to=save_to, lower=lower,
-                       upper=upper, limit=litmi)
+                       upper=upper, limit=limit)
 
         rp.fetch_all()
