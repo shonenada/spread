@@ -1,6 +1,7 @@
 #-*- coding: utf-8 -*-
 from utils.scel_crawler import RangePage
 from utils.scel2txt import SCELSet
+from utils.word2bems import BEMSHelper
 
 
 class Command(object):
@@ -67,3 +68,19 @@ class Scel2TxtCommand(Command):
         scel_set.from_path(path)
 
         scel_set.write_file(out_to, fields=('word',))
+
+
+class BEMSCommand(Command):
+
+    command = 'bems'
+    args_table = ('filepath', 'out_path')
+
+    def _do(self):
+        
+        filepath, out_path = self.args
+
+        bems = BEMSHelper(filepath)
+
+        bems.analyse_file()
+        bems.analyse_probability()
+        bems.write_file(out_path)

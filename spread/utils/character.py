@@ -39,7 +39,8 @@ class Character(object):
         if 65280 < char < 65375:
             return char - 65248
         if ord('A') <= char <= ord('Z'):
-            return char += 32
+            char += 32
+            return char
         return char
 
     @staticmethod

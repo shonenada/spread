@@ -1,6 +1,7 @@
 #-*- coding: utf-8 -*-
 import re
 import os
+import json
 
 from .character import Character
 
@@ -14,7 +15,7 @@ class BEMS(object):
         self.words = Character.unicodify(words)
 
     def transform(self):
-        chinese_words = CHINESE_PATTERN.findall(self.words)
+        chinese_words = self.CHINESE_PATTERN.findall(self.words)
         if not chinese_words:
             return list()
 
@@ -60,16 +61,16 @@ class BEMSHelper(object):
         self.emit_probability = {'B': {}, 'M': {}, 'E': {}, 'S': {}}
 
     def update_emit(self, bems):
-        word, state = bems
+        word, state = bems['word'], bems['state']
         if word not in self.emit_list.keys():
             self.word_item = {'B': 0.0, 'M': 0.0, 'E': 0.0, 'S': 0.0}
-            self.emit_list.setdefault(word, word_item)
+            self.emit_list.setdefault(word, self.word_item)
         self.emit_list[word][state] += 1
 
     def calculate_emit_probability(self):
         counts = {'B': 0.0, 'M': 0.0, 'E': 0.0, 'S': 0.0}
         for wordsbems in self.emit_list.values():
-            for state, count = wordsbems.iteritems():
+            for state, count in wordsbems.iteritems():
                 counts[state] += count
 
         for word, wordsbems in self.emit_list.iteritems():
@@ -105,12 +106,12 @@ class BEMSHelper(object):
                         self.transform_count[last][each['state']] += 1
                     last = each['state']
 
-    def analyse_probility(self):
+    def analyse_probability(self):
 
         # start probability
         start_total = sum(self.start_count.values())
         for key in self.start_probability:
-            self.start_probability[key] = start_count[key] / start_total
+            self.start_probability[key] = self.start_count[key] / start_total
 
         # total probability
         bems_total = sum(self.bems_count.values())
