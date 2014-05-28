@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 import sys
 
-from commands import CrawlerCommand, TestCommand
+from commands import CrawlerCommand, Scel2TxtCommand, TestCommand
 
 
 class CLI(object):
@@ -34,5 +34,5 @@ class CLI(object):
 
 
 if __name__ == '__main__':
-    cli = CLI(commands=(CrawlerCommand, TestCommand))
+    cli = CLI(commands=(CrawlerCommand, Scel2TxtCommand, TestCommand,))
     cli.run()

@@ -1,4 +1,5 @@
 #-*- coding: utf-8 -*-
+import os
 import struct
 
 
@@ -18,6 +19,7 @@ class SCEL(object):
 
     def __init__(self, file_path):
         self.file_path = file_path
+        self.results = []
 
     def unpack(self, code):
         fmt_chr = struct.unpack('H', code)
@@ -42,7 +44,7 @@ class SCEL(object):
         spelling_table = dict()
 
         flag = data[0:4]
-        if flag is not self.TABLE_START_FLAG:
+        if flag != self.TABLE_START_FLAG:
             return None
 
         pos = 0
@@ -50,14 +52,14 @@ class SCEL(object):
         byte = data[4:]
         length = len(byte)
 
-        while position < length:
+        while pos < length:
             idx_pos = byte[pos : pos + 2]
             index = self.unpack(idx_pos)
             pos += 2
             size_pos = byte[pos : pos + 2]
-            size = unpack(size_pos)
+            size = self.unpack(size_pos)
             pos += 2
-            spelling = byte2str(byte[pos : pos + size])
+            spelling = self.byte2str(byte[pos : pos + size])
             spelling_table[index] = spelling
             pos += size
 
@@ -104,19 +106,38 @@ class SCEL(object):
                     {'number': number,
                      'spelling': spelling,
                      'word': word})
+        return results
 
-        def analyse(self):
-            with open(self.file_path, 'rb') as scel:
-                data = scel.read()
+    def analyse(self):
+        with open(self.file_path, 'rb') as scel:
+            data = scel.read()
 
-                if data[0 : 12] is not SCEL_FLAG:
-                    print("Not *.scel file")
-                    return None
+        if data[0 : 12] != self.SCEL_FLAG:
+            print("Not *.scel file")
+            return None
 
-                table = get_table(data[TABLE_START : CHINESE_START])
-                results = get_chinese(data[CHINESE_START:], table)
-        
-            return results
+        table = self.get_table(data[self.TABLE_START : self.CHINESE_START])
+        results = self.get_chinese(data[self.CHINESE_START:], table)
+        self.results = results
+        return results
+
+    def write_file(self, out_path, filename=None, fields=None):
+        if filename is None:
+            filename = '%s.%s' % (self.file_path.rsplit('/', 1).pop(), 'txt')
+
+        if fields is None:
+            fields = ('number', 'spelling', 'word')
+
+        line = []
+
+        for item in self.results:
+            for field in fields:
+                line.append(unicode(item[field]).encode('utf-8'))
+        output = '\n'.join(line)
+
+        out_path = os.path.join(out_path, filename)
+        with open(out_path, 'w') as out:
+            out.write(output)
 
 
 class SCELSet(object):
@@ -124,26 +145,20 @@ class SCELSet(object):
     def __init__(self):
         self.scels = set()
 
-    def from_files(scel_files):
+    def from_files(self, scel_files):
         for _file in scel_files:
+            if not _file.endswith('scel'):
+                continue
+
             scel = SCEL(_file)
             self.scels.add(scel)
 
+    def from_path(self, path):
+        for root, dirs, files in os.walk(path):
+            self.from_files(['%s/%s' % (path, f) for f in files])
+
     def write_file(self, out_to, fields=None):
-        if fields is None:
-            fields = ('number', 'spelling', 'word')
 
         for scel in self.scels:
-            results = scel.analyse()
-            if not results:
-                continue
-
-            with open(out_to, 'w') as out_stream:
-                for item in results:
-                    line = []
-                    for field in fields:
-                        line.append(field)
-                        line.append(results[field])
-
-                out_stream.write(line)
-                out_stream.write('\n')
+            scel.analyse()
+            scel.write_file(out_to, fields=fields)
