@@ -42,7 +42,7 @@ class BEMSHelper(object):
     def reset(self, filename):
         self.filename = filename
         self.emit_list = dict()
-        self.start_count = {'B': 0.0, 'S': 0.0}
+        self.start_count = {'B': 0.0, 'S': 0.0, 'M': 0.0, 'E': 0.0}
         self.bems_count = {'B': 0.0, 'M': 0.0, 'E': 0.0, 'S': 0.0}
         self.transform_count = {
             'B': {'M': 0.0, 'E': 0.0,},
@@ -50,13 +50,13 @@ class BEMSHelper(object):
             'M': {'E': 0.0, 'M': 0.0,},
             'S': {'B': 0.0, 'S': 0.0,}
         }
-        self.start_probability = {'B': 0.0, 'S': 0.0}
+        self.start_probability = {'B': 0.0, 'S': 0.0, 'M': 0.0, 'E': 0.0}
         self.bems_probability = {'B': 0.0, 'M': 0.0, 'E': 0.0, 'S': 0.0}
         self.transform_probability = {
-            'B': {'M': 0.0, 'E': 0.0,},
-            'E': {'B': 0.0, 'S': 0.0,},
-            'M': {'E': 0.0, 'M': 0.0,},
-            'S': {'B': 0.0, 'S': 0.0,}
+            'B': {'B': 0.0, 'M': 0.0, 'E': 0.0, 'S': 0.0},
+            'E': {'B': 0.0, 'M': 0.0, 'E': 0.0, 'S': 0.0},
+            'M': {'B': 0.0, 'M': 0.0, 'E': 0.0, 'S': 0.0},
+            'S': {'B': 0.0, 'M': 0.0, 'E': 0.0, 'S': 0.0},
         }
         self.emit_probability = {'B': {}, 'M': {}, 'E': {}, 'S': {}}
 
@@ -131,11 +131,11 @@ class BEMSHelper(object):
         if not os.path.exists(folder_path):
             os.mkdir (folder_path)
 
-        with open('%s/start_prob.txt' % folder_path, 'w') as out:
+        with open('%s/start_prob.json' % folder_path, 'w') as out:
             out.write(json.dumps(self.start_probability, indent=2))
 
-        with open('%s/transform_prob.txt' % folder_path, 'w') as out:
+        with open('%s/transform_prob.json' % folder_path, 'w') as out:
             out.write(json.dumps(self.transform_probability, indent=2))
 
-        with open('%s/emit_prob.txt' % folder_path, 'w') as out:
+        with open('%s/emit_prob.json' % folder_path, 'w') as out:
             out.write(json.dumps(self.emit_probability, indent=2))
