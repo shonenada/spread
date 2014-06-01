@@ -111,4 +111,4 @@ class SpreadCommand(Command):
                 result.append(spread.split_sentence(line))
 
         for seg in result:
-            print '/ '.join(seg)
+            print '/ '.join([x.encode('utf-8') for x in seg])

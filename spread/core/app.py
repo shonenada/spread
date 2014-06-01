@@ -20,7 +20,7 @@ class Spread(object):
         sentence = Character.unicodify(sentence)
 
         chinese = re.compile(ur'([\u4E00-\u9FA5]+)')
-        english = re.compile(ur'[^a-zA-Z0-9+#\n]')
+        skip_pattern = re.compile(ur'[^a-zA-Z0-9+#\n，。“”：；‘’]')
 
         blocks = chinese.split(sentence)
 
@@ -29,7 +29,7 @@ class Spread(object):
                 for word in self.cut(block):
                     yield word
             else:
-                char = english.split(block)
+                char = skip_pattern.split(block)
                 for c in char:
                     if c != '':
                         yield c
