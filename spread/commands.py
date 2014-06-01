@@ -1,7 +1,9 @@
 #-*- coding: utf-8 -*-
-from utils.scel_crawler import RangePage
-from utils.scel2txt import SCELSet
-from utils.word2bems import BEMSHelper
+
+from spread.core.app import Spread
+from spread.utils.scel_crawler import RangePage
+from spread.utils.scel2txt import SCELSet
+from spread.utils.word2bems import BEMSHelper
 
 
 class Command(object):
@@ -17,7 +19,8 @@ class Command(object):
 
     def do(self):
         if not self.valid():
-            print 'Error arguments for %s' % self.commands
+            print 'Error arguments for %s' % self.command
+            print 'Args Tabls: ', self.args_table
             return None
 
         self._do()
@@ -84,3 +87,28 @@ class BEMSCommand(Command):
         bems.analyse_file()
         bems.analyse_probability()
         bems.write_file(out_path)
+
+
+class SpreadCommand(Command):
+
+    command = 'spread'
+    args_table = ('path', 'start', 'trans', 'emit')
+
+    def _do(self):
+
+        path, start, trans, emit = self.args
+
+        spread = Spread()
+
+        spread.load_start_prob(start)
+        spread.load_trans_prob(trans)
+        spread.load_emit_prob(emit)
+
+        result = list()
+
+        with open(path, 'r') as input_file:
+            for line in input_file.readlines():
+                result.append(spread.split_sentence(line))
+
+        for seg in result:
+            print '/ '.join(seg)
