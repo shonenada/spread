@@ -36,11 +36,11 @@ class BEMS(object):
 
 class BEMSHelper(object):
 
-    def __init__(self, filename):
-        self.reset(filename)
+    def __init__(self, txt_folder=None):
+        self.reset(txt_folder)
 
-    def reset(self, filename):
-        self.filename = filename
+    def reset(self, txt_folder):
+        self.txt_folder = txt_folder
         self.emit_list = dict()
         self.start_count = {'B': 0.0, 'S': 0.0, 'M': 0.0, 'E': 0.0}
         self.bems_count = {'B': 0.0, 'M': 0.0, 'E': 0.0, 'S': 0.0}
@@ -81,8 +81,17 @@ class BEMSHelper(object):
                 prob = float(wordsbems[state] / counts[state])
                 self.emit_probability[state][word] = prob
 
-    def analyse_file(self):
-        with open(self.filename, 'r') as _file:
+    def analyse(self):
+        for root, dirs, files in os.walk(self.txt_folder):
+            for _f in files:
+                if not _f.endswith('txt'):
+                    continue
+                self.analyse_file(os.path.join(root, _f))
+
+        self.analyse_probability()
+
+    def analyse_file(self, filename):
+        with open(filename, 'r') as _file:
             last = None
             for line in iter(_file.readline, ''):
                 bems = BEMS(line)
@@ -127,14 +136,33 @@ class BEMSHelper(object):
         # emit probability
         self.calculate_emit_probability()
 
-    def write_file(self, folder_path):
+    def write_count_file(self, folder_path, prefix=None):
+        if not os.path.exists(folder_path):
+            os.mkdir (folder_path)
+
+        if prefix is None:
+            prefix = ''
+        else:
+            prefix = prefix + '_'
+
+        with open('%s/%sstart_count.json' % (folder_path, prefix), 'w') as out:
+            out.write(json.dumps(self.start_count, indent=2))
+
+        with open('%s/%strans_count.json' % (folder_path, prefix), 'w') as out:
+            out.write(json.dumps(self.transform_count, indent=2))
+
+        with open('%s/%semit_count.json' % (folder_path, prefix), 'w') as out:
+            out.write(json.dumps(self.emit_list, indent=2))
+
+
+    def write_prob_file(self, folder_path):
         if not os.path.exists(folder_path):
             os.mkdir (folder_path)
 
         with open('%s/start_prob.json' % folder_path, 'w') as out:
             out.write(json.dumps(self.start_probability, indent=2))
 
-        with open('%s/transform_prob.json' % folder_path, 'w') as out:
+        with open('%s/trans_prob.json' % folder_path, 'w') as out:
             out.write(json.dumps(self.transform_probability, indent=2))
 
         with open('%s/emit_prob.json' % folder_path, 'w') as out:

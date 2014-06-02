@@ -3,14 +3,16 @@ import sys
 
 from spread.commands import TestCommand
 from spread.commands import CrawlerCommand, Scel2TxtCommand, BEMSCommand
-from spread.commands import SpreadCommand
+from spread.commands import SpreadCommand, SpreadShortCutCommand
+from spread.commands import BEMSCountCommand
 
 
 class CLI(object):
 
     default_commands = (TestCommand,
                         CrawlerCommand, Scel2TxtCommand, BEMSCommand,
-                        SpreadCommand)
+                        SpreadCommand, SpreadShortCutCommand,
+                        BEMSCountCommand)
 
     def __init__(self, commands=()):
         self.commands = dict()

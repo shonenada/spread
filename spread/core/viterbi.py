@@ -26,7 +26,7 @@ def viterbi(observe, states, start_prob, trans_prob, emit_prob):
                 [(path_prob[t-1][_s] *
                   trans_prob[_s].get(each, 0) *
                   emit_prob[each].get(observe[t], 0), _s)
-                 for _s in states if path_prob[t-1][_s] > 0])
+                 for _s in states if path_prob[t-1][_s] >= 0])
             path_prob[t][each] = prob
             newpath[each] = path[state] + [each]
 

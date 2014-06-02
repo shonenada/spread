@@ -1,4 +1,5 @@
 #-*- coding: utf-8 -*-
+import os
 
 from spread.core.app import Spread
 from spread.utils.scel_crawler import RangePage
@@ -76,17 +77,36 @@ class Scel2TxtCommand(Command):
 class BEMSCommand(Command):
 
     command = 'bems'
-    args_table = ('filepath', 'out_path')
+    args_table = ('txt_folder', 'out_path')
 
     def _do(self):
         
-        filepath, out_path = self.args
+        txt_folder, out_path = self.args
 
-        bems = BEMSHelper(filepath)
+        bems = BEMSHelper(txt_folder)
 
-        bems.analyse_file()
-        bems.analyse_probability()
-        bems.write_file(out_path)
+        bems.analyse()
+        bems.write_prob_file(out_path)
+
+
+class BEMSCountCommand(Command):
+
+    command = 'count'
+    args_table = ('txt_folder', 'out_path')
+
+    def _do(self):
+
+        txt_folder, out_path = self.args
+
+        for root, dirs, files in os.walk(txt_folder):
+            for _f in files:
+                if not _f.endswith('txt'):
+                    continue
+                path = os.path.join(root, _f)
+                prefix = _f.rsplit('.')[0]
+                bems = BEMSHelper()
+                bems.analyse_file(path)
+                bems.write_count_file(out_path, prefix=prefix)
 
 
 class SpreadCommand(Command):
@@ -112,3 +132,23 @@ class SpreadCommand(Command):
 
         for seg in result:
             print '/ '.join([x.encode('utf-8') for x in seg])
+
+
+class SpreadShortCutCommand(Command):
+
+    command = 'sr'
+    args_table = ('path', 'prob_folder')
+
+    def _do(self):
+
+        path, prob_folder = self.args
+
+        proxy = SpreadCommand()
+        proxy.set_args((
+            path,
+            os.path.join(prob_folder, 'start_prob.json'),
+            os.path.join(prob_folder, 'trans_prob.json'),
+            os.path.join(prob_folder, 'emit_prob.json')
+        ))
+
+        proxy.do()
