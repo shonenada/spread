@@ -158,7 +158,6 @@ class SCELSet(object):
             self.from_files(['%s/%s' % (path, f) for f in files])
 
     def write_file(self, out_to, fields=None):
-
         for scel in self.scels:
             scel.analyse()
             scel.write_file(out_to, fields=fields)

@@ -45,10 +45,10 @@ class BEMSHelper(object):
         self.start_count = {'B': 0.0, 'S': 0.0, 'M': 0.0, 'E': 0.0}
         self.bems_count = {'B': 0.0, 'M': 0.0, 'E': 0.0, 'S': 0.0}
         self.transform_count = {
-            'B': {'M': 0.0, 'E': 0.0,},
-            'E': {'B': 0.0, 'S': 0.0,},
-            'M': {'E': 0.0, 'M': 0.0,},
-            'S': {'B': 0.0, 'S': 0.0,}
+            'B': {'B': 0.0, 'M': 0.0, 'E': 0.0, 'S': 0.0},
+            'E': {'B': 0.0, 'M': 0.0, 'E': 0.0, 'S': 0.0},
+            'M': {'B': 0.0, 'M': 0.0, 'E': 0.0, 'S': 0.0},
+            'S': {'B': 0.0, 'M': 0.0, 'E': 0.0, 'S': 0.0},
         }
         self.start_probability = {'B': 0.0, 'S': 0.0, 'M': 0.0, 'E': 0.0}
         self.bems_probability = {'B': 0.0, 'M': 0.0, 'E': 0.0, 'S': 0.0}
@@ -116,7 +116,6 @@ class BEMSHelper(object):
                     last = each['state']
 
     def analyse_probability(self):
-
         # start probability
         start_total = sum(self.start_count.values())
         for key in self.start_probability:
@@ -136,24 +135,18 @@ class BEMSHelper(object):
         # emit probability
         self.calculate_emit_probability()
 
-    def write_count_file(self, folder_path, prefix=None):
+    def write_count_file(self, folder_path, filename):
         if not os.path.exists(folder_path):
             os.mkdir (folder_path)
 
-        if prefix is None:
-            prefix = ''
-        else:
-            prefix = prefix + '_'
+        data = {
+            'start_cout': self.start_count,
+            'transform_count': self.transform_count,
+            'emit_list': self.emit_list,
+        }
 
-        with open('%s/%sstart_count.json' % (folder_path, prefix), 'w') as out:
-            out.write(json.dumps(self.start_count, indent=2))
-
-        with open('%s/%strans_count.json' % (folder_path, prefix), 'w') as out:
-            out.write(json.dumps(self.transform_count, indent=2))
-
-        with open('%s/%semit_count.json' % (folder_path, prefix), 'w') as out:
-            out.write(json.dumps(self.emit_list, indent=2))
-
+        with open('%s/%s.json' % (folder_path, filename), 'w') as out:
+            out.write(json.dumps(data, indent=2))
 
     def write_prob_file(self, folder_path):
         if not os.path.exists(folder_path):

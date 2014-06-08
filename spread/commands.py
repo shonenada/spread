@@ -1,5 +1,7 @@
 #-*- coding: utf-8 -*-
 import os
+import re
+import json
 
 from spread.core.app import Spread
 from spread.utils.scel_crawler import RangePage
@@ -103,10 +105,10 @@ class BEMSCountCommand(Command):
                 if not _f.endswith('txt'):
                     continue
                 path = os.path.join(root, _f)
-                prefix = _f.rsplit('.')[0]
+                filename = _f.rsplit('.')[0]
                 bems = BEMSHelper()
                 bems.analyse_file(path)
-                bems.write_count_file(out_path, prefix=prefix)
+                bems.write_count_file(out_path, filename=filename)
 
 
 class SpreadCommand(Command):
@@ -152,3 +154,35 @@ class SpreadShortCutCommand(Command):
         ))
 
         proxy.do()
+
+
+class SpreadServerCommand(Command):
+
+    command = 'spread-server'
+    args_table = ('infile', 'prob_path', 'output')
+
+    def _do(self):
+        infile, prob_path, output = self.args
+
+        spread = Spread()
+
+        start_path = os.path.join(prob_path, 'start_prob.json')
+        trans_path = os.path.join(prob_path, 'trans_prob.json')
+        emit_path = os.path.join(prob_path, 'emit_prob.json')
+
+        spread.load_start_prob(start_path)
+        spread.load_trans_prob(trans_path)
+        spread.load_emit_prob(emit_path)
+
+        result = list()
+
+        with open(infile, 'r') as input_file:
+            for line in input_file.readlines():
+                for each in spread.split_sentence(line):
+                    result.append(each)
+
+        if not os.path.exists(output):
+            os.mkdir(output)
+
+        with open(os.path.join(output, 'dict.json'), 'w') as out_file:
+            out_file.write(json.dumps(result, indent=2))

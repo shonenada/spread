@@ -5,6 +5,7 @@ from spread.commands import TestCommand
 from spread.commands import CrawlerCommand, Scel2TxtCommand, BEMSCommand
 from spread.commands import SpreadCommand, SpreadShortCutCommand
 from spread.commands import BEMSCountCommand
+from spread.commands import SpreadServerCommand
 
 
 class CLI(object):
@@ -12,7 +13,7 @@ class CLI(object):
     default_commands = (TestCommand,
                         CrawlerCommand, Scel2TxtCommand, BEMSCommand,
                         SpreadCommand, SpreadShortCutCommand,
-                        BEMSCountCommand)
+                        BEMSCountCommand, SpreadServerCommand)
 
     def __init__(self, commands=()):
         self.commands = dict()
@@ -38,6 +39,8 @@ class CLI(object):
         args = sys.argv
         if not len(args) > 1:
             print "Please input your command."
+            for command in self.command_instances:
+                print command.command, command.args_table
             return None
 
         cmd = args[1]
