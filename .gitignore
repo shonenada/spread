@@ -54,3 +54,6 @@ docs/_build/
 
 # Virtualenv Env
 venv
+
+# DS_Store
+.DS_Store
