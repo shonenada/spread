@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Spread</title>
+    <style>
+    .borad {
+        text-align: center;
+        font-size: 36px;
+    }
+    #pre_borad,
+    #after_borad {
+        color: #bbb;
+    }
+    </style>
+    <script src="./jquery.min.js"></script>
+    <script>
+    var result = null;
+    var current = 0;
+    $.ajax({
+        url: './dict.json',
+        dataType: 'json',
+        async: true,
+        type: 'get',
+        success: function(respone) {
+            result = respone;
+        }
+    });
+    var next = function () {
+        $('#pre_borad').html(result[current - 1]);
+        $('#borad').html(result[current]);
+        $('#after_borad').html(result[current + 1]);
+        current += 1;
+    }
+    var timer = setInterval(next, 250);
+    timer();
+    </script>
+</head>
+
+<body>
+    <div id="pre_borad" class="borad">
+    </div>
+    <div id="borad" class="borad">
+    </div>
+    <div id="after_borad" class="borad">
+    </div>
+</body>
+
+</html>
